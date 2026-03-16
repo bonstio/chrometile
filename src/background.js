@@ -73,6 +73,69 @@ const LAYOUTS = new Map([
             "height": height - 2*margin
         };
     }],
+    ["Ultrawide", function(windowIndex, windowCount, mWindowCount, area, margin, splitPct) {
+        let centerWidth = Math.round((area.width+margin) * splitPct);
+        let sideWidth = Math.round((area.width+margin) * (1-splitPct) / 2);
+
+        if (windowIndex < mWindowCount) {
+            let cCount = Math.min(windowCount, mWindowCount);
+            let cHeight = Math.round((area.height-margin) / cCount);
+            return {
+                "top":    area.top + margin + (cHeight * windowIndex),
+                "left":   area.left + sideWidth,
+                "width":  centerWidth - 2*margin,
+                "height": cHeight - margin
+            };
+        }
+
+        let sideWindows = windowCount - mWindowCount;
+        let leftWindows = Math.ceil(sideWindows / 2);
+        let rightWindows = Math.floor(sideWindows / 2);
+        let isLeft = (windowIndex - mWindowCount) % 2 === 0;
+        let sideIndex = Math.floor((windowIndex - mWindowCount) / 2);
+
+        if (isLeft) {
+            let cols = leftWindows > 2 ? 2 : 1;
+            let rows = Math.ceil(leftWindows / cols);
+            let col = sideIndex % cols;
+            let row = Math.floor(sideIndex / cols);
+
+            let lWidth = Math.round(sideWidth / cols);
+            let lHeight = Math.round((area.height-margin) / rows);
+            
+            let finalWidth = lWidth;
+            if (cols === 2 && sideIndex === leftWindows - 1 && leftWindows % 2 !== 0) {
+                finalWidth = sideWidth;
+            }
+
+            return {
+                "top":    area.top + margin + (lHeight * row),
+                "left":   area.left + margin + (lWidth * col),
+                "width":  finalWidth - 2*margin,
+                "height": lHeight - margin
+            };
+        } else {
+            let cols = rightWindows > 2 ? 2 : 1;
+            let rows = Math.ceil(rightWindows / cols);
+            let col = sideIndex % cols;
+            let row = Math.floor(sideIndex / cols);
+
+            let rWidth = Math.round(sideWidth / cols);
+            let rHeight = Math.round((area.height-margin) / rows);
+            
+            let finalWidth = rWidth;
+            if (cols === 2 && sideIndex === rightWindows - 1 && rightWindows % 2 !== 0) {
+                finalWidth = sideWidth;
+            }
+
+            return {
+                "top":    area.top + margin + (rHeight * row),
+                "left":   area.left + sideWidth + centerWidth + (rWidth * col),
+                "width":  finalWidth - 2*margin,
+                "height": rHeight - margin
+            };
+        }
+    }],
 ]);
 
 async function loadDenyList() {
